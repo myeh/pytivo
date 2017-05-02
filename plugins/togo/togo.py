@@ -35,21 +35,21 @@ DEFPATH = '/TiVoConnect?Command=QueryContainer&Container=/NowPlaying'
 
 # Some error/status message templates
 
-MISSING = """<h3>Missing Data</h3> <p>You must set both "tivo_mak" and 
+MISSING = """<h3>Missing Data</h3> <p>You must set both "tivo_mak" and
 "togo_path" before using this function.</p>"""
 
-TRANS_QUEUE = """<h3>Queued for Transfer</h3> <p>%s</p> <p>queued for 
+TRANS_QUEUE = """<h3>Queued for Transfer</h3> <p>%s</p> <p>queued for
 transfer to:</p> <p>%s</p>"""
 
-TRANS_STOP = """<h3>Transfer Stopped</h3> <p>Your transfer of:</p> 
+TRANS_STOP = """<h3>Transfer Stopped</h3> <p>Your transfer of:</p>
 <p>%s</p> <p>has been stopped.</p>"""
 
-UNQUEUE = """<h3>Removed from Queue</h3> <p>%s</p> <p>has been removed 
+UNQUEUE = """<h3>Removed from Queue</h3> <p>%s</p> <p>has been removed
 from the queue.</p>"""
 
-UNABLE = """<h3>Unable to Connect to TiVo</h3> <p>pyTivo was unable to 
-connect to the TiVo at %s.</p> <p>This is most likely caused by an 
-incorrect Media Access Key. Please return to the Settings page and 
+UNABLE = """<h3>Unable to Connect to TiVo</h3> <p>pyTivo was unable to
+connect to the TiVo at %s.</p> <p>This is most likely caused by an
+incorrect Media Access Key. Please return to the Settings page and
 double check your <b>tivo_mak</b> setting.</p> <pre>%s</pre>"""
 
 # Preload the templates
@@ -65,13 +65,13 @@ basic_meta = {} # Data from NPL, parsed, indexed by progam URL
 details_urls = {} # URLs for extended data, indexed by main URL
 
 def null_cookie(name, value):
-    return cookielib.Cookie(0, name, value, None, False, '', False, 
+    return cookielib.Cookie(0, name, value, None, False, '', False,
         False, '', False, False, None, False, None, None, None)
 
 auth_handler = urllib2.HTTPPasswordMgrWithDefaultRealm()
 cj = cookielib.CookieJar()
 cj.set_cookie(null_cookie('sid', 'ADEADDA7EDEBAC1E'))
-tivo_opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), 
+tivo_opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj),
                                    urllib2.HTTPBasicAuthHandler(auth_handler),
                                    urllib2.HTTPDigestAuthHandler(auth_handler))
 
@@ -246,10 +246,12 @@ class ToGo(Plugin):
 
         parse_url = urlparse.urlparse(url)
 
+        if status[url]['save']:
+            meta = basic_meta[url]
+
         name = unicode(unquote(parse_url[2]), 'utf-8').split('/')[-1].split('.')
         try:
-            id = unquote(parse_url[4]).split('id=')[1]
-            name.insert(-1, ' - ' + id)
+            name.insert(-1, ' - ' + meta['episodeTitle'])
         except:
             pass
         ts = status[url]['ts_format']
@@ -322,7 +324,7 @@ class ToGo(Plugin):
                 now = time.time()
                 elapsed = now - last_interval
                 if elapsed >= 5:
-                    status[url]['rate'] = '%.2f Mb/s' % (length * 8.0 / 
+                    status[url]['rate'] = '%.2f Mb/s' % (length * 8.0 /
                         (elapsed * 1024 * 1024))
                     status[url]['size'] += length
                     length = 0
